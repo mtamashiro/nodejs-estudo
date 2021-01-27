@@ -3,10 +3,23 @@ const TabelaFornecedor = require('./TabelaFornecedor');
 const Fornecedor = require('./Fornecedor');
 const SerializadorFornecedor = require('../../Serializador').SerializadorFornecedor;
 
+roteador.options('/', (requisicao, resposta) => {
+    resposta.set('Acess-Control-Allow-Methods', 'GET,POST');
+    resposta.set('Acess-Control-Allow-Headers', 'Content-Type');
+    resposta.status(204).end();
+});
+
+roteador.options('/:idFornecedor', (requisicao, resposta) => {
+    resposta.set('Acess-Control-Allow-Methods', 'GET,PUT,DELETE');
+    resposta.set('Acess-Control-Allow-Headers', 'Content-Type');
+    resposta.status(204).end();
+});
+
 roteador.get('/', async (requisicao, resposta) => {
     const resultados = await TabelaFornecedor.listar()
     const serializador = new SerializadorFornecedor(
-        resposta.getHeader('Content-Type')
+        resposta.getHeader('Content-Type'),
+        ['empresa']
     );
     resposta.status(200).send(
         serializador.serializar(resultados)
@@ -19,7 +32,8 @@ roteador.post('/', async(requisicao, resposta, proximo) => {
         const fornecedor = new Fornecedor(dadosRecebidos);
         await fornecedor.criar();
         const serializador = new SerializadorFornecedor(
-            resposta.getHeader('Content-Type')
+            resposta.getHeader('Content-Type'),
+            ['empresa']
         );
         resposta.status(201).send(
             serializador.serializar(fornecedor)
@@ -36,7 +50,7 @@ roteador.get('/:idFornecedor', async(requisicao, resposta, proxima) => {
         await fornecedor.carregar();
         const serializador = new SerializadorFornecedor(
             resposta.getHeader('Content-Type'),
-            ['email', 'dataCriacao', 'dataAtualizacao', 'versao']
+            ['empresa', 'email', 'dataCriacao', 'dataAtualizacao', 'versao']
         );
         resposta.status(200).send(
             serializador.serializar(fornecedor)
